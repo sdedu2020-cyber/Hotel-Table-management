@@ -1,4 +1,3 @@
-
 export enum TableStatus {
   Vacant = 'Vacant',
   Occupied = 'Occupied',
@@ -9,7 +8,7 @@ export interface MenuItem {
   id: number;
   name: string;
   price: number;
-  category: 'Appetizer' | 'Main Course' | 'Dessert' | 'Drink';
+  category: string;
   description: string;
 }
 

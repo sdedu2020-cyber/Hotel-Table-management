@@ -5,16 +5,16 @@ import { PlusIcon, MinusIcon, TrashIcon, XIcon, ClipboardListIcon } from './icon
 interface NewOrderModalProps {
   tables: Table[]; // vacant tables
   menu: MenuItem[];
+  categories: string[];
   onClose: () => void;
   onCreateOrder: (tableId: number, newOrder: OrderItem[]) => void;
 }
 
-const NewOrderModal: React.FC<NewOrderModalProps> = ({ tables, menu, onClose, onCreateOrder }) => {
+const NewOrderModal: React.FC<NewOrderModalProps> = ({ tables, menu, categories, onClose, onCreateOrder }) => {
   const [selectedTableId, setSelectedTableId] = useState<number | null>(tables.length > 0 ? tables[0].id : null);
   const [order, setOrder] = useState<OrderItem[]>([]);
   
-  const categories: MenuItem['category'][] = ['Appetizer', 'Main Course', 'Dessert', 'Drink'];
-  const [selectedCategory, setSelectedCategory] = useState<MenuItem['category'] | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   const addItem = (itemToAdd: MenuItem) => {
@@ -50,7 +50,7 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ tables, menu, onClose, on
       }
   };
   
-  const handleCategorySelect = (category: MenuItem['category']) => {
+  const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setIsSidebarVisible(false);
   };
@@ -152,22 +152,26 @@ const NewOrderModal: React.FC<NewOrderModalProps> = ({ tables, menu, onClose, on
               {/* Category Sidebar */}
               {isSidebarVisible && (
                 <nav className="w-48 flex-shrink-0 bg-gray-900/50 rounded-lg p-2 overflow-y-auto">
-                    <ul className="space-y-1">
-                    {categories.map(category => (
-                        <li key={category}>
-                        <button
-                            onClick={() => handleCategorySelect(category)}
-                            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                            selectedCategory === category
-                                ? 'bg-purple-600 text-white'
-                                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                            }`}
-                        >
-                            {category}s
-                        </button>
-                        </li>
-                    ))}
-                    </ul>
+                    {categories.length === 0 ? (
+                        <p className='text-center text-sm text-gray-500 p-4'>No categories created yet. Add one in the 'Add Item' menu.</p>
+                    ) : (
+                        <ul className="space-y-1">
+                        {categories.map(category => (
+                            <li key={category}>
+                            <button
+                                onClick={() => handleCategorySelect(category)}
+                                className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                selectedCategory === category
+                                    ? 'bg-purple-600 text-white'
+                                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                }`}
+                            >
+                                {category}
+                            </button>
+                            </li>
+                        ))}
+                        </ul>
+                    )}
                 </nav>
               )}
 

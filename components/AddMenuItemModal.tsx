@@ -3,20 +3,22 @@ import { MenuItem } from '../types';
 import { XIcon } from './icons';
 
 interface AddMenuItemModalProps {
+  categories: string[];
   onClose: () => void;
   onAddItem: (item: Omit<MenuItem, 'id'>) => void;
+  onAddCategory: (categoryName: string) => void;
 }
 
-const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ onClose, onAddItem }) => {
+const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ categories, onClose, onAddItem, onAddCategory }) => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState<'Appetizer' | 'Main Course' | 'Dessert' | 'Drink'>('Appetizer');
+  const [category, setCategory] = useState<string>(categories[0] || '');
   const [description, setDescription] = useState('');
 
-  const [errors, setErrors] = useState({ name: '', price: '' });
+  const [errors, setErrors] = useState({ name: '', price: '', category: '' });
 
   const validate = () => {
-    const newErrors = { name: '', price: '' };
+    const newErrors = { name: '', price: '', category: '' };
     let isValid = true;
     if (!name.trim()) {
       newErrors.name = 'Item name is required.';
@@ -27,9 +29,21 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ onClose, onAddItem 
       newErrors.price = 'Please enter a valid positive price.';
       isValid = false;
     }
+    if (!category) {
+        newErrors.category = 'Please select or add a category.';
+        isValid = false;
+    }
     setErrors(newErrors);
     return isValid;
   };
+  
+  const handleAddCategoryClick = () => {
+    const categoryName = prompt("Enter new category name:");
+    if (categoryName) {
+        onAddCategory(categoryName);
+        setCategory(categoryName); // Select the new category automatically
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,11 +107,13 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ onClose, onAddItem 
                 onChange={(e) => setCategory(e.target.value as any)}
                 className="w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
               >
-                <option value="Appetizer">Appetizer</option>
-                <option value="Main Course">Main Course</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Drink">Drink</option>
+                {categories.length === 0 ? (
+                    <option value="">Please add a category first</option>
+                ) : (
+                    categories.map(cat => <option key={cat} value={cat}>{cat}</option>)
+                )}
               </select>
+               {errors.category && <p id="item-category-error" className="text-red-400 text-xs mt-1">{errors.category}</p>}
             </div>
              <div>
               <label htmlFor="item-description" className="block text-sm font-medium text-gray-300 mb-1">Description</label>
@@ -111,13 +127,18 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ onClose, onAddItem 
               />
             </div>
           </div>
-          <footer className="p-4 bg-gray-700/50 flex justify-end gap-3">
-             <button type="button" onClick={onClose} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md transition-colors">
-                Cancel
+          <footer className="p-4 bg-gray-700/50 flex justify-between items-center gap-3">
+            <button type="button" onClick={handleAddCategoryClick} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                Add Category
             </button>
-            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
-                Add Item
-            </button>
+            <div className="flex gap-3">
+                <button type="button" onClick={onClose} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                    Add Item
+                </button>
+            </div>
           </footer>
         </form>
       </div>

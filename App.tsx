@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table, OrderItem, TableStatus, MenuItem } from './types';
 import { INITIAL_TABLES, MENU_ITEMS } from './constants';
 import TableLayout from './components/TableLayout';
@@ -8,9 +8,37 @@ import NewOrderModal from './components/NewOrderModal';
 import AddMenuItemModal from './components/AddMenuItemModal';
 import { PlusIcon, ClipboardListIcon } from './components/icons';
 
+// Custom hook to manage state with localStorage persistence
+const useLocalStorageState = <T,>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const storedValue = window.localStorage.getItem(key);
+      if (storedValue !== null) {
+        return JSON.parse(storedValue);
+      }
+    } catch (error) {
+      console.error("Error reading from localStorage for key:", key, error);
+    }
+    return defaultValue;
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("Error writing to localStorage for key:", key, error);
+    }
+  }, [key, value]);
+
+  return [value, setValue];
+};
+
+
 const App: React.FC = () => {
-  const [tables, setTables] = useState<Table[]>(INITIAL_TABLES);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(MENU_ITEMS);
+  const [tables, setTables] = useLocalStorageState<Table[]>('restaurant-tables', INITIAL_TABLES);
+  const [menuItems, setMenuItems] = useLocalStorageState<MenuItem[]>('restaurant-menu', MENU_ITEMS);
+  const [categories, setCategories] = useLocalStorageState<string[]>('restaurant-categories', []);
+  
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [billingTable, setBillingTable] = useState<Table | null>(null);
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
@@ -41,7 +69,7 @@ const App: React.FC = () => {
     if (selectedTable && selectedTable.id === tableId) {
       setSelectedTable(prev => prev ? { ...prev, order: newOrder } : null);
     }
-  }, [selectedTable]);
+  }, [selectedTable, setTables]);
   
   const handleUpdateStatus = useCallback((tableId: number, newStatus: TableStatus) => {
       setTables(prevTables =>
@@ -52,7 +80,7 @@ const App: React.FC = () => {
       if (selectedTable && selectedTable.id === tableId) {
           setSelectedTable(prev => prev ? { ...prev, status: newStatus } : null);
       }
-  }, [selectedTable]);
+  }, [selectedTable, setTables]);
 
   const handleRequestBill = useCallback((table: Table) => {
     setTables(prevTables =>
@@ -62,7 +90,7 @@ const App: React.FC = () => {
     );
     setSelectedTable(null);
     setBillingTable({ ...table, status: TableStatus.NeedsBill });
-  }, []);
+  }, [setTables]);
   
   const handleMarkAsPaid = useCallback((tableId: number) => {
     setTables(prevTables =>
@@ -76,7 +104,7 @@ const App: React.FC = () => {
     if (billingTable && billingTable.id === tableId) {
       setBillingTable(null);
     }
-  }, [selectedTable, billingTable]);
+  }, [selectedTable, billingTable, setTables]);
   
   const handleCreateOrder = useCallback((tableId: number, newOrder: OrderItem[]) => {
     if (newOrder.length > 0) {
@@ -89,7 +117,7 @@ const App: React.FC = () => {
         );
     }
     setIsNewOrderModalOpen(false);
-  }, []);
+  }, [setTables]);
   
   const handleAddNewMenuItem = useCallback((item: Omit<MenuItem, 'id'>) => {
       setMenuItems(prevMenu => {
@@ -97,7 +125,13 @@ const App: React.FC = () => {
           const newItem: MenuItem = { ...item, id: newId };
           return [...prevMenu, newItem];
       });
-  }, []);
+  }, [setMenuItems]);
+
+  const handleAddCategory = useCallback((categoryName: string) => {
+    if (categoryName && !categories.includes(categoryName)) {
+        setCategories(prev => [...prev, categoryName].sort());
+    }
+  }, [categories, setCategories]);
 
 
   return (
@@ -151,14 +185,17 @@ const App: React.FC = () => {
         <NewOrderModal
             tables={tables.filter(t => t.status === TableStatus.Vacant)}
             menu={menuItems}
+            categories={categories}
             onClose={() => setIsNewOrderModalOpen(false)}
             onCreateOrder={handleCreateOrder}
         />
       )}
       {isAddItemModalOpen && (
         <AddMenuItemModal 
+            categories={categories}
             onClose={() => setIsAddItemModalOpen(false)}
             onAddItem={handleAddNewMenuItem}
+            onAddCategory={handleAddCategory}
         />
       )}
     </div>

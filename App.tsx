@@ -13,12 +13,18 @@ const useLocalStorageState = <T,>(key: string, defaultValue: T): [T, React.Dispa
   const [value, setValue] = useState<T>(() => {
     try {
       const storedValue = window.localStorage.getItem(key);
-      if (storedValue !== null) {
-        return JSON.parse(storedValue);
+      // Check if storedValue is not null or undefined before parsing
+      if (storedValue) {
+        const parsed = JSON.parse(storedValue);
+        // Ensure the parsed value is not null before returning
+        if (parsed !== null) {
+          return parsed;
+        }
       }
     } catch (error) {
       console.error("Error reading from localStorage for key:", key, error);
     }
+    // If anything fails or the stored value is null, return the default value
     return defaultValue;
   });
 

@@ -139,16 +139,15 @@ const App: React.FC = () => {
     }
   }, [categories, setCategories]);
 
-
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans">
       <header className="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10 p-4 border-b border-gray-700">
         <div className="flex justify-between items-center container mx-auto">
             <h1 className="text-2xl font-bold text-purple-400">Wix Restaurant POS</h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
                 <button
                     onClick={() => setIsAddItemModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-2 sm:px-4 rounded-md transition-colors flex items-center gap-2"
                     aria-label="Add new menu item"
                 >
                     <ClipboardListIcon className="w-5 h-5" />
@@ -156,7 +155,7 @@ const App: React.FC = () => {
                 </button>
                 <button
                     onClick={() => setIsNewOrderModalOpen(true)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors flex items-center gap-2"
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-2 sm:px-4 rounded-md transition-colors flex items-center gap-2"
                     aria-label="Create new order"
                 >
                     <PlusIcon className="w-5 h-5" />

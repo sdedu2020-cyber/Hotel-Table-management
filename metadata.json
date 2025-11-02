@@ -1,0 +1,5 @@
+{
+  "name": "Wix Restaurant POS",
+  "description": "A modern, AI-assisted point-of-sale (POS) application for waiters to manage table orders efficiently. Waiters can view table statuses, add items to orders, and get AI-powered meal recommendations from Gemini.",
+  "requestFramePermissions": []
+}
